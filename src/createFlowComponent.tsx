@@ -1,15 +1,5 @@
 import * as React from 'react';
 
-enum INPUT_TYPE {
-  BIGINT = 'bigint',
-  BOOLEAN = 'boolean',
-  FUNCTION = 'function',
-  NUMBER = 'number',
-  OBJECT = 'object',
-  STRING = 'string',
-  UNDEFINED = 'undefined',
-}
-
 type KeyValue = {
   [key: string]: any
 }
@@ -26,7 +16,7 @@ export type FlowType = {
 };
 
 function determineKey(rKey: FlowType['r-key'], item: Item, index: number): string | number {
-  if (typeof item === INPUT_TYPE.OBJECT) {
+  if (typeof item === 'object') {
     return rKey ? (item as KeyValue)[rKey] : index;
   }
   
@@ -35,13 +25,13 @@ function determineKey(rKey: FlowType['r-key'], item: Item, index: number): strin
 
 type TTag = keyof JSX.IntrinsicElements;
 
-export function createFlowComponent(tag: TTag, props: FlowType) {
+export function createFlowComponent(tag: TTag = 'div', props: FlowType) {
   const Tag = tag;
 
   const { 'r-for': rFor, 'r-key': rKey, 'r-if': rIf = true, children, ...rest } = props;
 
   if (rFor) {
-    // const ref = React.useRef(null);
+    // const arrRef = React.useRef(null);
 
     return <>{(rFor as Array<Item>).map((item: Item, index: number) => (
       <Tag key={determineKey(rKey, item, index)} {...rest}>

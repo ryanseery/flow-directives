@@ -21,7 +21,6 @@ const movies: MovieT[] = [
 ]
 
 type MovieProps = { item: MovieT };
-
 function Movie({ item }: MovieProps): React.ReactElement {
   return (
     <span>{item.title}</span>
