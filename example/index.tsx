@@ -3,47 +3,46 @@ import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import { flow } from '../.';
 
-type MovieT = { id: string, title: string };
+type MovieT = { id: string; title: string };
 
 const movies: MovieT[] = [
   {
     id: '1',
-    title: 'Star Wars'
+    title: 'Star Wars',
   },
   {
     id: '2',
-    title: 'There Will Be Blood'
+    title: 'There Will Be Blood',
   },
   {
     id: '3',
-    title: 'The Third Man'
-  }
-]
+    title: 'The Third Man',
+  },
+];
 
 type MovieProps = { item?: MovieT };
 function Movie({ item }: MovieProps): React.ReactElement {
-  return (
-    <span>{item?.title}</span>
-  )
+  return <span>{item?.title}</span>;
 }
 
 function App() {
+  const [state, setState] = React.useState<boolean>(true);
+
   return (
-    <div style={{ height: '100vh', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-      <div>
-      <flow.div>
-        This is a div
-      </flow.div>
+    <div>
+      <button type="button" onClick={() => setState(!state)}>
+        {state ? 'If' : 'Else'}
+      </button>
+
+      <flow.div r-if={state}>This is a div</flow.div>
 
       <flow.ul>
         <flow.li r-for={movies} r-key="id">
-          <Movie /> 
+          <Movie />
         </flow.li>
       </flow.ul>
-
-      </div>
     </div>
   );
-};
+}
 
 ReactDOM.render(<App />, document.getElementById('root'));
