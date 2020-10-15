@@ -4,11 +4,11 @@ type KeyValue = {
   [key: string]: any
 }
 
-type Item = KeyValue | string | number
+type Item = KeyValue | string;
 
 export type FlowType = {
   children?: React.ReactElement | string;
-  'r-for'?: Item;
+  'r-for'?: Item[];
   'r-key'?: string | number;
   'r-if'?: boolean;
   'r-else'?: boolean;
@@ -25,26 +25,39 @@ function determineKey(rKey: FlowType['r-key'], item: Item, index: number): strin
 
 type TTag = keyof JSX.IntrinsicElements;
 
-export function createFlowComponent(tag: TTag = 'div', props: FlowType) {
-  const Tag = tag;
+export function createFlowComponent(tag: TTag, props: FlowType): JSX.Element {
+  const ref = React.useRef(null);
+
+
+  console.log('ref: ', ref);
 
   const { 'r-for': rFor, 'r-key': rKey, 'r-if': rIf = true, children, ...rest } = props;
 
   if (rFor) {
-    // const arrRef = React.useRef(null);
+    const refs = React.useRef(Array.from(rFor, () => React.createRef()));
 
-    return <>{(rFor as Array<Item>).map((item: Item, index: number) => (
-      <Tag key={determineKey(rKey, item, index)} {...rest}>
-        {typeof children === 'string' ? (
-          children
-        ) : (
-          React.Children.map(children, child => {
-            return React.cloneElement(child as React.ReactElement<any>, {item}, null);
-          })
-        )}
-      </Tag>
-    ))}</>
+    console.log('ref: ', refs);
+
+    return React.createElement(
+      React.Fragment,
+      null,
+      (rFor as Array<Item>).map((item: Item, index: number) => (
+        React.createElement(
+          tag,
+          { key: determineKey(rKey, item, index), ref: refs.current[index], ...rest },
+          typeof children === 'string'
+            ? children
+            : React.Children.map(children, child => {
+              return React.cloneElement(child as React.ReactElement<any>, {item}, null);
+            }) 
+        )
+      ))
+    )
   }
 
-  return <Tag>{children}</Tag>;
+  return React.createElement(tag, {ref}, children);
+}
+
+createFlowComponent.defaultProps = {
+  tag: 'div',
 }
