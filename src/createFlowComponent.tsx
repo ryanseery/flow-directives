@@ -28,7 +28,6 @@ type TTag = keyof JSX.IntrinsicElements;
 export function createFlowComponent(tag: TTag, props: FlowType): JSX.Element {
   const ref = React.useRef(null);
 
-
   console.log('ref: ', ref);
 
   const { 'r-for': rFor, 'r-key': rKey, 'r-if': rIf = true, children, ...rest } = props;
