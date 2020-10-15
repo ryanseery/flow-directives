@@ -34,7 +34,8 @@ function App() {
         {state ? 'If' : 'Else'}
       </button>
 
-      <flow.div r-if={state}>This is a div</flow.div>
+      <flow.div r-if={state}>This div has r-if prop.</flow.div>
+      <flow.div r-else>This div has r-else prop.</flow.div>
 
       <flow.ul>
         <flow.li r-for={movies} r-key="id">
