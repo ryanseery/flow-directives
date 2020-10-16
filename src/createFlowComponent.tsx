@@ -11,7 +11,7 @@ type KeyValue = {
 type Item = KeyValue | string;
 
 export type FlowType = {
-  children?: React.ReactElement | string;
+  children?: JSX.Element | JSX.Element[] | string;
   'r-for'?: Item[];
   'r-key'?: string | number;
   'r-if'?: boolean;
@@ -33,37 +33,6 @@ function determineKey(rKey: FlowType['r-key'], item: Item, index: number): strin
   return index;
 }
 
-function FlowCompArr({
-  tag,
-  'r-for': rFor,
-  'r-key': rKey,
-  'r-if': rIf = true,
-  children,
-  ...rest
-}: Comp): JSX.Element | null {
-  // TODO previousElementSibling / attributes / nodeValue
-  const refs = React.useRef(Array.from(rFor ?? [], () => React.createRef()));
-  // console.log('refs: ', refs);
-
-  return e(
-    React.Fragment,
-    null,
-    (rFor as Array<Item>).map((item: Item, index: number) =>
-      e(
-        tag,
-        {
-          key: determineKey(rKey, item, index),
-          ref: refs.current[index],
-          ...rest,
-        },
-        typeof children === 'string'
-          ? children
-          : React.Children.map(children, child => c(child as React.ReactElement<any>, { item }, null))
-      )
-    )
-  );
-}
-
 function FlowComp({
   tag,
   'r-for': rFor,
@@ -73,20 +42,28 @@ function FlowComp({
   children,
   ...rest
 }: Comp): JSX.Element | null {
-  const [ref, shouldRender] = useRefCallback();
+  const [ref] = useRefCallback();
 
-  console.log('shouldRender: ', shouldRender);
+  console.log('shouldRender: ', ref);
 
-  return shouldRender ? e(tag, { ref, 'data-rif': rIf, 'data-relse': rElse, ...rest }, children) : null;
+  return e(tag, { 'data-rif': rIf, 'data-relse': rElse, ...rest }, children);
 }
 
 export function CreateFlowComponent(tag: Tag, props: FlowType): JSX.Element | null {
-  const { 'r-for': rFor } = props;
+  const { 'r-key': rKey, 'r-for': rFor, children } = props;
 
   const defaultProps = { tag, ...props };
 
   if (rFor) {
-    return <FlowCompArr {...defaultProps} />;
+    return e(
+      React.Fragment,
+      null,
+      (rFor as Array<Item>).map((item: Item, index: number) => (
+        <FlowComp key={determineKey(rKey, item, index)} {...defaultProps}>
+          {React.Children.map(children, child => c(child as React.ReactElement<any>, { item }, null))}
+        </FlowComp>
+      ))
+    );
   }
 
   return <FlowComp {...defaultProps} />;
