@@ -8,7 +8,7 @@ type KeyValue = {
   [key: string]: any;
 };
 
-export type Item = KeyValue | string;
+type Item = KeyValue | string;
 
 export type FlowType = {
   children?: JSX.Element | JSX.Element[] | string;

@@ -16,7 +16,8 @@ export function useRefListener({ rIf, rElseIf, rElse }: UseRefListener): [boolea
    * 
    * if rElseIf its reliant on state
    * 
-   * if is rElse, opposite of the node's above's else if
+   * if is rElse, opposite of the node's above's else if all the way up to rIf
+   * recursive function going up sibling comps until rIf or not flow comp
    */
   if (isIf) {
     return [(rIf as boolean), ref]
