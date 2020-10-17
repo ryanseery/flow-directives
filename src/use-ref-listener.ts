@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-const checkBool = (a: any) => typeof a === "boolean";
+const checkBool = (a: any): boolean => typeof a === "boolean";
 
 type UseRefListener = {
   rIf?: boolean;
@@ -8,9 +8,10 @@ type UseRefListener = {
   rElse?: boolean;
 }
 
-export function useRefListener({ rIf, rElseIf, rElse }: UseRefListener): [boolean, React.Ref<HTMLElement>] {
+export function useRefListener({ rIf, rElseIf, rElse }: UseRefListener): [boolean, any] {
   const ref = React.useRef<HTMLElement | null>(null);
   const [isIf, isElse, isElseIf] = React.useMemo(() => ([checkBool(rIf), checkBool(rElse), checkBool(rElseIf)]), []);
+  
   /**
    * if rIf its reliant on state
    * 
