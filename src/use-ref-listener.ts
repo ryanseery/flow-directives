@@ -9,9 +9,20 @@ type UseRefListener = {
 }
 
 export function useRefListener({ rIf, rElseIf, rElse }: UseRefListener): [boolean, any] {
-  const ref = React.useRef<HTMLElement | null>(null);
+  // const ref = React.useRef<HTMLElement | null>(null);
   const [isIf, isElse, isElseIf] = React.useMemo(() => ([checkBool(rIf), checkBool(rElse), checkBool(rElseIf)]), []);
   
+  const ref = React.useCallback(node => {
+    if (node != null) { 
+      if (isElse) {
+        console.log('I am GOD', node?.previousElementSibling?.attributes.includes('rif'));
+      }
+      
+    }
+  }, []);
+
+  // console.log('test: ', test);
+
   /**
    * if rIf its reliant on state
    * 

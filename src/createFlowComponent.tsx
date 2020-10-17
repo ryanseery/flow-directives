@@ -50,6 +50,9 @@ function FlowComp({
   return render ? e(tag, { ref, 'data-rif': rIf, 'data-relse': rElse, ...rest }, children) : null;
 }
 
+// TODO check this shite out
+// let cache = {};
+
 // TODO check props of children to make sure they don't have more than one r-boolean type
 // i.e. r-if, r-else-if, r-else each can have r-for
 // r-if can't have r-else-if or r-else and so on
