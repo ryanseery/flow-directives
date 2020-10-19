@@ -1,10 +1,10 @@
 import * as React from 'react';
-import { useRefListener } from './useRefListener';
+import { useRender } from './useRender';
 
 const e = React.createElement;
 const c = React.cloneElement;
 
-type KeyValue = {
+export type KeyValue = {
   [key: string]: any;
 };
 
@@ -33,8 +33,22 @@ function determineKey(rKey: FlowType['r-key'], item: Item, index: number): strin
   return index;
 }
 
-function FlowComp({ tag, children, 'r-if': rIf, 'r-else': rElse, 'r-else-if': rElseIf, ...rest }: Comp): JSX.Element {
-  return e(tag, { 'data-flow-if': rIf, 'data-flow-else': rElse, 'data-flow-else-if': rElseIf, ...rest }, children);
+function FlowComp(props: Comp): JSX.Element | null {
+  const [render, id] = useRender(props);
+  const { tag, children, 'r-if': rIf, 'r-else': rElse, 'r-else-if': rElseIf, ...rest } = props;
+
+  return render
+    ? e(
+        tag,
+        {
+          'data-flow-if': rIf,
+          'data-flow-else': rElse,
+          'data-flow-else-if': rElseIf,
+          ...rest,
+        },
+        children
+      )
+    : null;
 }
 
 // TODO check props of children to make sure they don't have more than one r-boolean type
@@ -44,10 +58,8 @@ export function CreateFlowComponent(tag: Tag, props: FlowType): JSX.Element | nu
   const { 'r-key': rKey, 'r-for': rFor, children } = props;
   const defaultProps = { tag, ...props };
 
-  const [render] = useRefListener(defaultProps);
-
   if (rFor) {
-    return render ? (
+    return (
       <>
         {(rFor as Array<Item>).map((item: Item, index: number) => (
           <FlowComp key={determineKey(rKey, item, index)} {...defaultProps}>
@@ -55,8 +67,8 @@ export function CreateFlowComponent(tag: Tag, props: FlowType): JSX.Element | nu
           </FlowComp>
         ))}
       </>
-    ) : null;
+    );
   }
 
-  return render ? <FlowComp {...defaultProps} /> : null;
+  return <FlowComp {...defaultProps} />;
 }
