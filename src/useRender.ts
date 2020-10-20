@@ -10,6 +10,10 @@ class Cache {
     this.data.add(args);
   }
 
+  public remove(args: KeyValue): void {
+    this.data.delete(args);
+  }
+
   public clear(): void {
     this.data.clear();
   }
@@ -36,7 +40,7 @@ export function useRender(props: IUseRender): [boolean] {
   React.useEffect(() => {
     cache.set(props);
     return () => {
-      cache.clear();
+      cache.remove(props);
     };
   }, []);
 
