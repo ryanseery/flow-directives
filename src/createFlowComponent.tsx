@@ -25,6 +25,13 @@ export interface Comp extends FlowType {
   tag: Tag;
 }
 
+function randomString(): string {
+  return Math.random()
+    .toString(36)
+    .replace(/[^a-z]+/g, '')
+    .substr(2, 10);
+}
+
 function determineKey(rKey: FlowType['r-key'], item: Item, index: number): string | number {
   if (typeof item === 'object') {
     return rKey ? (item as KeyValue)[rKey] : index;
@@ -34,13 +41,15 @@ function determineKey(rKey: FlowType['r-key'], item: Item, index: number): strin
 }
 
 function FlowComp(props: Comp): JSX.Element | null {
-  const [render, id] = useRender(props);
+  const id = randomString();
+  const [render] = useRender({ id, ...props });
   const { tag, children, 'r-if': rIf, 'r-else': rElse, 'r-else-if': rElseIf, ...rest } = props;
 
   return render
     ? e(
         tag,
         {
+          'data-flow-id': id,
           'data-flow-if': rIf,
           'data-flow-else': rElse,
           'data-flow-else-if': rElseIf,

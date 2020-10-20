@@ -3,83 +3,60 @@ import { Comp, KeyValue } from './createFlowComponent';
 
 const checkBool = (a: any): boolean => typeof a === 'boolean';
 
-type ICache = {
-  data: KeyValue[];
-  counter: number;
-  getId: (tag: string) => string;
-  set: (args: Comp) => void;
-  clear: () => void;
-  length: () => number;
-  isUnique: (id: string) => boolean;
-};
+class Cache {
+  public data = new Set();
 
-const cache: ICache = {
-  data: [],
-  counter: 0,
-  getId: tag => {
-    return `${tag}_${++cache.counter}`;
-  },
-  set: args => {
-    if (cache.isUnique(args.tag)) {
-      cache.data.push(args);
-    }
-  },
-  clear: () => {
-    cache.data = [];
-  },
-  length: () => {
-    return Object.keys(cache.data).length;
-  },
-  isUnique: id => {
-    let found: boolean = true;
+  public set(args: KeyValue): void {
+    this.data.add(args);
+  }
 
-    for (let i = 0; i < cache.data.length; i++) {
-      if (cache.data[i]['data-flow-id'] === id) {
-        found = false;
-        break;
-      }
-    }
+  public clear(): void {
+    this.data.clear();
+  }
 
-    return found;
-  },
-};
+  public length(): number {
+    return this.data.size;
+  }
 
-export function useRender(props: Comp): [boolean, ICache['getId']] {
-  cache.set(props);
+  public getSibling() {}
+}
 
+const cache = new Cache();
+
+interface IUseRender extends Comp {
+  id: string;
+}
+
+export function useRender(props: IUseRender): [boolean] {
   const [isIf, isElse, isElseIf] = React.useMemo(
     () => [checkBool(props['r-if']), checkBool(props['r-else']), checkBool(props['r-else-if'])],
     []
   );
 
   React.useEffect(() => {
+    cache.set(props);
     return () => {
-      console.log('******************* UNMOUNTED');
       cache.clear();
     };
   }, []);
 
   if (isIf) {
-    return [props['r-if'] as boolean, cache.getId];
+    return [props['r-if'] as boolean];
   }
 
   if (isElse) {
-    if (cache) {
-      console.log('cache: ', cache);
-      // const sibling: Comp = cache.get(cacheSize);
-      // is sibling a flow comp
-      // if ('r-if' in sibling) {
-      //   return [!sibling['r-if'] as boolean];
-      // }
-      return [true, cache.getId];
-    }
+    console.log('in if: ', cache.data);
+    // const sibling: Comp = cache.get(cacheSize);
+    // is sibling a flow comp
+    // if ('r-if' in sibling) {
+    //   return [!sibling['r-if'] as boolean];
+    // }
+    return [true];
   }
 
   if (isElseIf) {
-    return [false, cache.getId];
+    return [false];
   }
 
-  console.log('cache: ', cache.data);
-
-  return [true, cache.getId];
+  return [true];
 }
