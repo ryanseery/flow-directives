@@ -1,39 +1,48 @@
 import * as React from 'react';
-import { Comp, KeyValue } from './createFlowComponent';
+import { KeyValue } from './createFlowComponent';
 
-const checkBool = (a: any): boolean => typeof a === 'boolean';
+type Dep = string | number | Function;
 
-const cache: KeyValue[] = [];
+// const checkBool = (a: any): boolean => typeof a === 'boolean';
 
-interface IUseRender extends Comp {
-  id: string;
-}
-export function useRender(props: IUseRender): [boolean] {
-  const [isIf, isElse, isElseIf] = React.useMemo(
-    () => [checkBool(props['r-if']), checkBool(props['r-else']), checkBool(props['r-else-if'])],
-    []
-  );
+const cache: KeyValue = {};
+
+// TODO cut out redundancy
+// TODO determine render
+export function useRender(key: string, obj: KeyValue, deps: Dep[]): KeyValue {
+  // const [isIf, isElse, isElseIf] = React.useMemo(
+  //   () => [checkBool(obj['r-if']), checkBool(obj['r-else']), checkBool(obj['r-else-if'])],
+  //   []
+  // );
+
+  if (!cache[key]) {
+    cache[key] = {
+      subs: 0,
+      deps,
+      value: obj,
+    };
+  } else {
+    const oldDeps = (cache[key] = cache[key].deps);
+
+    if (oldDeps.length !== deps || oldDeps.some((d: Dep, i: number) => deps[i] !== d)) {
+      cache[key] = {
+        deps,
+        value: obj,
+      };
+    }
+  }
 
   React.useEffect(() => {
-    cache.push(props);
+    cache[key].subs += 1;
+
     return () => {
-      cache.filter(item => item.id !== props.id);
+      cache[key] -= 1;
+
+      if (!cache[key].subs) {
+        delete cache[key];
+      }
     };
   }, []);
 
-  if (isIf) {
-    return [props['r-if'] as boolean];
-  }
-
-  if (isElse) {
-    console.log('cache: ', cache);
-
-    return [true];
-  }
-
-  if (isElseIf) {
-    return [false];
-  }
-
-  return [true];
+  return cache;
 }
