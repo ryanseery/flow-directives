@@ -60,9 +60,6 @@ function FlowComp(props: Comp): JSX.Element | null {
     : null;
 }
 
-// TODO check props of children to make sure they don't have more than one r-boolean type
-// i.e. r-if, r-else-if, r-else each can have r-for
-// r-if can't have r-else-if or r-else and so on
 export function CreateFlowComponent(tag: Tag, props: FlowType): JSX.Element | null {
   const { 'r-key': rKey, 'r-for': rFor, children } = props;
   const defaultProps = { tag, ...props };
