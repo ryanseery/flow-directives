@@ -10,7 +10,7 @@ export type KeyValue = {
 
 type Item = KeyValue | string;
 
-export type FlowType = {
+type FlowType = {
   children?: JSX.Element | JSX.Element[] | string;
   'r-for'?: Item[];
   'r-key'?: string | number;
@@ -23,20 +23,6 @@ type Tag = keyof JSX.IntrinsicElements;
 
 export interface Comp extends FlowType {
   tag: Tag;
-}
-
-export class Cache {
-  public data: KeyValue[];
-  constructor() {
-    this.data = [];
-  }
-  set(args: KeyValue) {
-    this.data.push(args);
-  }
-  remove(args: KeyValue) {
-    const filteredData = this.data.filter(item => item.id !== args.id);
-    this.data = [...filteredData];
-  }
 }
 
 function randomString(): string {
@@ -56,22 +42,22 @@ function determineKey(rKey: FlowType['r-key'], item: Item, index: number): strin
 
 function FlowComp(props: Comp): JSX.Element | null {
   const id = randomString();
+  const [render] = useRender({ id, ...props });
   const { tag, children, 'r-if': rIf, 'r-else': rElse, 'r-else-if': rElseIf, ...rest } = props;
-  const test = useRender(id, props, [id]);
 
-  console.log('test: ', test);
-
-  return e(
-    tag,
-    {
-      'data-flow-id': id,
-      'data-flow-if': rIf,
-      'data-flow-else': rElse,
-      'data-flow-else-if': rElseIf,
-      ...rest,
-    },
-    children
-  );
+  return render
+    ? e(
+        tag,
+        {
+          'data-flow-id': id,
+          'data-flow-if': rIf,
+          'data-flow-else': rElse,
+          'data-flow-else-if': rElseIf,
+          ...rest,
+        },
+        children
+      )
+    : null;
 }
 
 export function CreateFlowComponent(tag: Tag, props: FlowType): JSX.Element | null {

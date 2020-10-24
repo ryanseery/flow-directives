@@ -1,48 +1,52 @@
 import * as React from 'react';
-import { KeyValue } from './createFlowComponent';
+import { Comp, KeyValue } from './createFlowComponent';
 
-type Dep = string | number | Function;
+const checkBool = (a: any): boolean => typeof a === 'boolean';
 
-// const checkBool = (a: any): boolean => typeof a === 'boolean';
+export class Cache {
+  public data: KeyValue[] = [];
 
-const cache: KeyValue = {};
-
-// TODO cut out redundancy
-// TODO determine render
-export function useRender(key: string, obj: KeyValue, deps: Dep[]): KeyValue {
-  // const [isIf, isElse, isElseIf] = React.useMemo(
-  //   () => [checkBool(obj['r-if']), checkBool(obj['r-else']), checkBool(obj['r-else-if'])],
-  //   []
-  // );
-
-  if (!cache[key]) {
-    cache[key] = {
-      subs: 0,
-      deps,
-      value: obj,
-    };
-  } else {
-    const oldDeps = (cache[key] = cache[key].deps);
-
-    if (oldDeps.length !== deps || oldDeps.some((d: Dep, i: number) => deps[i] !== d)) {
-      cache[key] = {
-        deps,
-        value: obj,
-      };
-    }
+  set(args: KeyValue): void {
+    const newArray = [{ ...args }, ...this.data];
+    this.data = [...Array.from(new Set(newArray))];
   }
 
+  remove(args: KeyValue): void {
+    const filteredData = this.data.filter(item => item.id !== args.id);
+    this.data = [...filteredData];
+  }
+}
+
+const cache = new Cache();
+
+interface IUseRender extends Comp {
+  id: string;
+}
+
+export function useRender({ id, 'r-if': rIf, 'r-else': rElse, 'r-else-if': rElseIf, ...rest }: IUseRender): [boolean] {
+  const [isIf, isElse, isElseIf] = React.useMemo(() => [checkBool(rIf), checkBool(rElse), checkBool(rElseIf)], []);
+
   React.useEffect(() => {
-    cache[key].subs += 1;
+    cache.set({ id, ...rest });
 
     return () => {
-      cache[key] -= 1;
-
-      if (!cache[key].subs) {
-        delete cache[key];
-      }
+      cache.remove({ id, ...rest });
     };
   }, []);
 
-  return cache;
+  console.log('cache: ', cache.data);
+
+  if (isIf) {
+    return [rIf as boolean];
+  }
+
+  if (isElse) {
+    return [false];
+  }
+
+  if (isElseIf) {
+    return [false];
+  }
+
+  return [true];
 }
