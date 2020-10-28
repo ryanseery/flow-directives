@@ -41,8 +41,11 @@ function determineKey(rKey: FlowType['r-key'], item: Item, index: number): strin
 }
 
 function FlowComp(props: Comp): JSX.Element | null {
-  const id = randomString();
-  const [render] = useRender({ id, ...props });
+  const id = React.useMemo(() => randomString(), []);
+  const [cache, render] = useRender({ id, ...props });
+
+  console.log('cache: ', cache.data);
+
   const { tag, children, 'r-if': rIf, 'r-else': rElse, 'r-else-if': rElseIf, ...rest } = props;
 
   return render

@@ -11,9 +11,23 @@ export class Cache {
     this.data = [...Array.from(new Set(newArray))];
   }
 
-  remove(args: KeyValue): void {
-    const filteredData = this.data.filter(item => item.id !== args.id);
+  remove(id: string): void {
+    const filteredData = this.data.filter(item => item.id !== id);
     this.data = [...filteredData];
+  }
+
+  getSibling(id: string) {
+    const test = this.data.findIndex(item => item.id === id);
+
+    console.log('test: ', test);
+  }
+
+  length(): number {
+    return this.data.length;
+  }
+
+  clear(): void {
+    this.data = [];
   }
 }
 
@@ -23,30 +37,35 @@ interface IUseRender extends Comp {
   id: string;
 }
 
-export function useRender({ id, 'r-if': rIf, 'r-else': rElse, 'r-else-if': rElseIf, ...rest }: IUseRender): [boolean] {
+export function useRender({
+  id,
+  'r-if': rIf,
+  'r-else': rElse,
+  'r-else-if': rElseIf,
+  ...rest
+}: IUseRender): [KeyValue, boolean] {
   const [isIf, isElse, isElseIf] = React.useMemo(() => [checkBool(rIf), checkBool(rElse), checkBool(rElseIf)], []);
 
   React.useEffect(() => {
     cache.set({ id, ...rest });
 
     return () => {
-      cache.remove({ id, ...rest });
+      cache.remove(id);
     };
   }, []);
 
-  console.log('cache: ', cache.data);
-
   if (isIf) {
-    return [rIf as boolean];
+    return [cache, rIf as boolean];
   }
 
   if (isElse) {
-    return [false];
+    console.log('func: ', cache.data);
+    return [cache, false];
   }
 
   if (isElseIf) {
-    return [false];
+    return [cache, false];
   }
 
-  return [true];
+  return [cache, true];
 }
