@@ -18,13 +18,11 @@ export class Cache {
       this.data.push(args);
     }
 
-    this.data.forEach(item => {
+    this.data.forEach((item, idx) => {
       if (item.id === args.id) {
-        item = args;
+        this.data[idx] = args;
       }
     });
-
-    console.log('hello: ', this.data);
   }
 
   remove(id: string): void {
@@ -60,8 +58,18 @@ export class Cache {
 
 const cache = new Cache();
 
+/**
+ * @name useRender
+ * @param {object} Comp
+ *
+ * @description caches the info of rendered components
+ *
+ * @returns {array} [boolean]
+ */
 export function useRender({ id, 'r-if': rIf, 'r-else': rElse, 'r-else-if': rElseIf, ...rest }: Comp): [boolean] {
+  // add component to cache
   cache.add({ id, rIf, rElse, rElseIf, ...rest });
+  // create flags
   const [isIf, isElse, isElseIf] = React.useMemo(() => [checkBool(rIf), checkBool(rElse), checkBool(rElseIf)], []);
 
   React.useEffect(() => {
@@ -76,7 +84,6 @@ export function useRender({ id, 'r-if': rIf, 'r-else': rElse, 'r-else-if': rElse
 
   if (isElse) {
     const render = cache.getRender(id);
-    console.log(render);
     return [render];
   }
 

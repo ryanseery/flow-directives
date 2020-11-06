@@ -42,7 +42,6 @@ function determineKey(rKey: FlowType['r-key'], item: Item, index: number): strin
 }
 
 function FlowComp(props: Comp): JSX.Element | null {
-  // les do this
   const [render] = useRender(props);
 
   const { tag, id, children, 'r-if': rIf, 'r-else': rElse, 'r-else-if': rElseIf, ...rest } = props;
