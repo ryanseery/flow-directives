@@ -1,10 +1,10 @@
 import * as React from 'react';
-import { useRefListener } from './use-ref-listener';
+import { useRender } from './useRender';
 
 const e = React.createElement;
 const c = React.cloneElement;
 
-type KeyValue = {
+export type KeyValue = {
   [key: string]: any;
 };
 
@@ -15,14 +15,22 @@ export type FlowType = {
   'r-for'?: Item[];
   'r-key'?: string | number;
   'r-if'?: boolean;
-  'r-else-if'?: boolean;
   'r-else'?: boolean;
+  'r-else-if'?: boolean;
 };
 
 type Tag = keyof JSX.IntrinsicElements;
 
-interface Comp extends FlowType {
+export interface Comp extends FlowType {
   tag: Tag;
+  id: string;
+}
+
+function randomString(): string {
+  return Math.random()
+    .toString(36)
+    .replace(/[^a-z]+/g, '')
+    .substr(2, 10);
 }
 
 function determineKey(rKey: FlowType['r-key'], item: Item, index: number): string | number {
@@ -33,30 +41,33 @@ function determineKey(rKey: FlowType['r-key'], item: Item, index: number): strin
   return index;
 }
 
-function FlowComp({
-  tag,
-  'r-for': rFor,
-  'r-key': rKey,
-  'r-if': rIf,
-  'r-else-if': rElseIf,
-  'r-else': rElse,
-  children,
-  ...rest
-}: Comp): JSX.Element | null {
-  const [render, ref] = useRefListener({ rIf, rElseIf, rElse });
+function FlowComp(props: Comp): JSX.Element | null {
+  const [render] = useRender(props);
 
-  console.log({ render, ref });
+  const { tag, id, children, 'r-if': rIf, 'r-else': rElse, 'r-else-if': rElseIf, ...rest } = props;
 
-  return render ? e(tag, { ref, 'data-rif': rIf, 'data-relse': rElse, ...rest }, children) : null;
+  return render
+    ? e(
+        tag,
+        {
+          'data-flow-id': id,
+          'data-flow-if': rIf,
+          'data-flow-else': rElse,
+          'data-flow-else-if': rElseIf,
+          ...rest,
+        },
+        children
+      )
+    : null;
 }
 
-// TODO check props of children to make sure they don't have more than one r-boolean type
-// i.e. r-if, r-else-if, r-else each can have r-for
-// r-if can't have r-else-if or r-else and so on
 export function CreateFlowComponent(tag: Tag, props: FlowType): JSX.Element | null {
-  const { 'r-key': rKey, 'r-for': rFor, children } = props;
+  // generate unique id
+  const id = React.useMemo(() => randomString(), []);
+  // get props ready to be build
+  const defaultProps = { tag, id, ...props };
 
-  const defaultProps = { tag, ...props };
+  const { 'r-key': rKey, 'r-for': rFor, children } = props;
 
   if (rFor) {
     return (
