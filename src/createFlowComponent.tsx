@@ -10,7 +10,7 @@ export type KeyValue = {
 
 type Item = KeyValue | string;
 
-type FlowType = {
+export type FlowType = {
   children?: JSX.Element | JSX.Element[] | string;
   'r-for'?: Item[];
   'r-key'?: string | number;
@@ -23,6 +23,7 @@ type Tag = keyof JSX.IntrinsicElements;
 
 export interface Comp extends FlowType {
   tag: Tag;
+  id: string;
 }
 
 function randomString(): string {
@@ -41,12 +42,10 @@ function determineKey(rKey: FlowType['r-key'], item: Item, index: number): strin
 }
 
 function FlowComp(props: Comp): JSX.Element | null {
-  const id = React.useMemo(() => randomString(), []);
-  const [cache, render] = useRender({ id, ...props });
+  // les do this
+  const [render] = useRender(props);
 
-  console.log('cache: ', cache.data);
-
-  const { tag, children, 'r-if': rIf, 'r-else': rElse, 'r-else-if': rElseIf, ...rest } = props;
+  const { tag, id, children, 'r-if': rIf, 'r-else': rElse, 'r-else-if': rElseIf, ...rest } = props;
 
   return render
     ? e(
@@ -64,8 +63,12 @@ function FlowComp(props: Comp): JSX.Element | null {
 }
 
 export function CreateFlowComponent(tag: Tag, props: FlowType): JSX.Element | null {
+  // generate unique id
+  const id = React.useMemo(() => randomString(), []);
+  // get props ready to be build
+  const defaultProps = { tag, id, ...props };
+
   const { 'r-key': rKey, 'r-for': rFor, children } = props;
-  const defaultProps = { tag, ...props };
 
   if (rFor) {
     return (

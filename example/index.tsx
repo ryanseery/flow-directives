@@ -30,7 +30,7 @@ function App() {
 
   return (
     <div>
-      <button type="button" onClick={() => setState(!state)}>
+      <button type="button" onClick={() => setState(s => !s)}>
         {state ? 'If' : 'Else'}
       </button>
 
