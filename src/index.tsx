@@ -9,4 +9,5 @@ export const flow = {
   ul: (props: FlowType) => CreateFlowComponent('ul', props),
   li: (props: FlowType) => CreateFlowComponent('li', props),
   button: (props: FlowType) => CreateFlowComponent('button', props),
+  p: (props: FlowType) => CreateFlowComponent('p', props),
 };

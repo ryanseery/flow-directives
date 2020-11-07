@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Comp, KeyValue } from './createFlowComponent';
+import { KeyValue } from './createFlowComponent';
 
 const checkBool = (a: any): boolean => typeof a === 'boolean';
 
@@ -36,10 +36,11 @@ export class Cache {
     // this is sibling
     const sibling = this.data[idx - 1];
     // check for r-else-if first
+    // TODO need to move up sibling tree to find rIf and get state
     if (sibling.rElseIf !== undefined) {
       return !sibling.rElseIf;
     }
-
+    // TODO need to move up sibling tree to find rIf and get state
     if (sibling.rIf !== undefined) {
       return !sibling.rIf;
     }
@@ -58,17 +59,15 @@ export class Cache {
 
 const cache = new Cache();
 
-/**
- * @name useRender
- * @param {object} Comp
- *
- * @description caches the info of rendered components
- *
- * @returns {array} [boolean]
- */
-export function useRender({ id, 'r-if': rIf, 'r-else': rElse, 'r-else-if': rElseIf, ...rest }: Comp): [boolean] {
+type UseRender = {
+  id: string;
+  rIf?: boolean;
+  rElse?: boolean;
+  rElseIf?: boolean;
+};
+export function useRender({ id, rIf, rElse, rElseIf }: UseRender): [boolean] {
   // add component to cache
-  cache.add({ id, rIf, rElse, rElseIf, ...rest });
+  cache.add({ id, rIf, rElse, rElseIf });
   // create flags
   const [isIf, isElse, isElseIf] = React.useMemo(() => [checkBool(rIf), checkBool(rElse), checkBool(rElseIf)], []);
 
