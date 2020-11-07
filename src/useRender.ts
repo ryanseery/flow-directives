@@ -5,11 +5,9 @@ const checkBool = (a: any): boolean => typeof a === 'boolean';
 
 export class Cache {
   public data: KeyValue[];
-
   constructor() {
     this.data = [];
   }
-
   add(args: KeyValue): void {
     // check if object exists in array
     const isFound = this.data.some(item => item.id === args.id);
@@ -24,34 +22,27 @@ export class Cache {
       }
     });
   }
-
   remove(id: string): void {
     const filteredData = this.data.filter(item => item.id !== id);
     this.data = [...filteredData];
   }
-
   getRender(id: string): boolean {
     // get index of sibling
     const idx = this.data.findIndex(item => item.id === id);
     // this is sibling
     const sibling = this.data[idx - 1];
-    // check for r-else-if first
     // TODO need to move up sibling tree to find rIf and get state
-    if (sibling.rElseIf !== undefined) {
-      return !sibling.rElseIf;
-    }
-    // TODO need to move up sibling tree to find rIf and get state
+    // TODO what about nested if else
+    // move up the tree, if there are else ifs put value in array. the whole array needs to be false
     if (sibling.rIf !== undefined) {
       return !sibling.rIf;
     }
 
     return true;
   }
-
   length(): number {
     return this.data.length;
   }
-
   clear(): void {
     this.data = [];
   }
@@ -81,12 +72,11 @@ export function useRender({ id, rIf, rElse, rElseIf }: UseRender): [boolean] {
     return [rIf as boolean];
   }
 
-  if (isElse) {
-    const render = cache.getRender(id);
-    return [render];
+  if (isElseIf) {
+    return [rElseIf as boolean];
   }
 
-  if (isElseIf) {
+  if (isElse) {
     const render = cache.getRender(id);
     return [render];
   }

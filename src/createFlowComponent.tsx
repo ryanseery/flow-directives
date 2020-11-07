@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { useRender } from './useRender';
-
+// create shorthands
 const e = React.createElement;
 const c = React.cloneElement;
 
@@ -33,18 +33,18 @@ function randomString(): string {
     .substr(2, 10);
 }
 
-function determineKey(rKey: FlowType['r-key'], item: Item, index: number): string | number {
+function determineKey(rKey: FlowType['r-key'], item: Item, idx: number): string | number {
   if (typeof item === 'object') {
-    return rKey ? (item as KeyValue)[rKey] : index;
+    return rKey ? (item as KeyValue)[rKey] : idx;
   }
 
-  return index;
+  return idx;
 }
 
 function FlowComp(props: Comp): JSX.Element | null {
-  const { tag, id, children, 'r-if': rIf, 'r-else': rElse, 'r-else-if': rElseIf, ...rest } = props;
+  const { tag, id, children, 'r-if': rIf, 'r-else-if': rElseIf, 'r-else': rElse, ...rest } = props;
 
-  const [render] = useRender({ id, rIf, rElse, rElseIf });
+  const [render] = useRender({ id, rIf, rElseIf, rElse });
 
   return render
     ? e(
@@ -52,13 +52,21 @@ function FlowComp(props: Comp): JSX.Element | null {
         {
           'data-flow-id': id,
           'data-flow-if': rIf,
-          'data-flow-else': rElse,
           'data-flow-else-if': rElseIf,
+          'data-flow-else': rElse,
           ...rest,
         },
         children
       )
     : null;
+}
+// TODO allow child to be string of item.value
+type Child = {
+  child?: JSX.Element | string;
+  item: Item;
+};
+function CreateChild({ child, item }: Child): React.ReactElement<any> {
+  return c(child as React.ReactElement<any>, { item }, null);
 }
 
 export function CreateFlowComponent(tag: Tag, props: FlowType): JSX.Element | null {
@@ -73,9 +81,9 @@ export function CreateFlowComponent(tag: Tag, props: FlowType): JSX.Element | nu
   if (rFor) {
     return (
       <>
-        {(rFor as Array<Item>).map((item: Item, index: number) => (
-          <FlowComp key={determineKey(rKey, item, index)} {...defaultProps}>
-            {React.Children.map(children, child => c(child as React.ReactElement<any>, { item }, null))}
+        {(rFor as Array<Item>).map((item: Item, idx: number) => (
+          <FlowComp key={determineKey(rKey, item, idx)} {...defaultProps}>
+            {React.Children.map(children, child => CreateChild({ child, item }))}
           </FlowComp>
         ))}
       </>
